@@ -268,6 +268,19 @@ than in review:
   same composable at every level, its acknowledgement outlived the page that started it
   and arrived greyed on the next one.
 
+**Gate a now-playing header on the ACTIVITY, not on "the room is on".** The obvious
+condition — source is not Off, and this player is playing or paused — is wrong in a way
+that takes a while to notice: a player holds a stale `paused` state for hours after you
+have switched away from it, so the header goes on describing a source the screen is no
+longer showing. Name the activity the row belongs to. It also makes "two rows matching
+at once" unreachable rather than merely unlikely.
+
+**A fade that is the boundary of something must not depend on what is inside it.** The
+gradient closing the bottom of the header took its height from the progress bar, and the
+progress bar draws nothing when a source publishes no duration — so the artwork ended on
+a hard horizontal edge exactly when a title had no timeline. It carries its own minimum
+height now.
+
 One more, in `EntityRefs`: entities referenced **only** by dock menus must be walked
 explicitly, or the app never subscribes to them. The symptom is a tile showing its menu
 name where a temperature belongs, which looks like a formatting bug.

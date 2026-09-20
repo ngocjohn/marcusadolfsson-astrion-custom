@@ -231,19 +231,23 @@ class BubbleClimateCard : CardRenderer {
                 Text(
                     current?.let { fmt(it) } ?: "\u2014",
                     color = Color(0xFFF1F4FA),
-                    // The page's headline number; it has the room for it here.
+                    // The page's headline number, and now weighted like one.
+                    // Light at 68sp read as elegant up close and as thin from
+                    // the other side of the room, which is where this is read.
                     fontSize = 68.sp,
-                    fontWeight = FontWeight.Light,
+                    fontWeight = FontWeight.Bold,
                 )
                 Text(
                     actionLabel(action, mode),
                     color = if (action in setOf("cooling", "heating", "drying")) accentMark
                             else Color(0xFF93AFB6),
-                    fontSize = 14.sp,
-                    fontWeight = FontWeight.Medium,
+                    // 14sp was a footnote under a 68sp number. This is what the
+                    // system is actually DOING; it earns more than that.
+                    fontSize = 19.sp,
+                    fontWeight = FontWeight.SemiBold,
                 )
             }
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(10.dp))
         } else {
         Row(
             modifier = Modifier
@@ -391,13 +395,32 @@ class BubbleClimateCard : CardRenderer {
             // pill: the pill is not on screen in this layout, and a hold is a
             // statement about the schedule, not about the number.
             if (inlinePicker && holding) {
-                Spacer(Modifier.height(8.dp))
+                // Clear of the screen edge, but not so clear that it falls off
+                // it. 26dp overflowed -- measured at [159,784][259,789], five
+                // visible pixels of a 33px line. The rest of the room came out
+                // of the picker's own padding above.
+                //
+                // At 18dp it fitted but sat within 13px of the rail; adding
+                // padding under it then CLIPPED it again, to 13 visible pixels
+                // -- a full page cannot be given more, only rearranged. The
+                // room comes from the wheel above (itemH 44 -> 40dp), and this
+                // gap shrinks so the lift lands on the row rather than on the
+                // space over it.
+                Spacer(Modifier.height(10.dp))
                 Row(
-                    modifier = Modifier.fillMaxWidth(),
+                    // Bottom padding, not more space above: the row already
+                    // fitted, it just hugged the rail. Padding under it pushes
+                    // it up without moving anything else down.
+                    modifier = Modifier.fillMaxWidth().padding(bottom = 18.dp),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Text("Holding", color = Color(0xFFF1F4FA), fontSize = 15.sp)
+                    Text(
+                        "Holding",
+                        color = Color(0xFFF1F4FA),
+                        fontSize = 19.sp,
+                        fontWeight = FontWeight.SemiBold,
+                    )
                     if (clearHold != null) {
                         Spacer(Modifier.width(8.dp))
                         val (hp, hc) = rememberPressFeedback {
@@ -406,7 +429,10 @@ class BubbleClimateCard : CardRenderer {
                         }
                         Box(
                             Modifier
-                                .size(30.dp)
+                                // Grown with the label it sits beside; a 30dp
+                                // target next to 19sp text reads as an
+                                // afterthought and is a small thing to hit.
+                                .size(38.dp)
                                 .clip(CircleShape)
                                 .background(ackColor(Color(0x33FFFFFF), hp))
                                 .pressFeedback(hp, hc),
@@ -503,7 +529,15 @@ class BubbleClimateCard : CardRenderer {
                             .clip(RoundedCornerShape(28.dp))
                             .background(Color(0xFF14262E))
                     )
-                    .padding(horizontal = 16.dp, vertical = 14.dp),
+                    // Tighter vertically when inline. The dialog needs the air
+                    // to separate itself from the page behind it; inline there
+                    // IS no page behind it, and that 14dp top and bottom was
+                    // the difference between the Holding row fitting and being
+                    // clipped to five pixels at the bottom of the screen.
+                    .padding(
+                        horizontal = 16.dp,
+                        vertical = if (inline) 6.dp else 14.dp,
+                    ),
                 horizontalAlignment = Alignment.CenterHorizontally,
             ) {
                 if (modeOpen) {
@@ -595,7 +629,10 @@ class BubbleClimateCard : CardRenderer {
                             }
                         }
                         Spacer(Modifier.width(12.dp))
-                        Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                        // 12dp put two 52dp circles close enough to read as one
+                        // control and to be mis-hit at the boundary. They are
+                        // opposite actions; they should not touch.
+                        Column(verticalArrangement = Arrangement.spacedBy(26.dp)) {
                             StepBtn(Icons.Filled.Add, if (isAuto && editHeat) heatMark else accentMark) {
                                 val v = (editing + stepped).coerceAtMost(maxTemp)
                                 if (isAuto) {
@@ -702,7 +739,12 @@ class BubbleClimateCard : CardRenderer {
         accent: Color,
         onSettle: (Double) -> Unit,
     ) {
-        val itemH = 44.dp
+        // 40, not 44. The page is full: the Holding row is last, and every dp
+        // the wheel takes is a dp it cannot have. Five rows at 44dp came to
+        // 303px and left the row hugging the rail; at 40dp they come to 275px
+        // and the difference is what lets Holding sit clear of it. The selected
+        // value is 36sp (~50px), so 40dp still frames it with room.
+        val itemH = 40.dp
         val values = remember(minTemp, maxTemp, stepped) {
             val out = mutableListOf<Double>()
             var v = maxTemp

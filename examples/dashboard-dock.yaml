@@ -34,7 +34,17 @@
       # a stale 'paused' long after the system is down, and a now-playing row
       # for a dark room is worse than none.
       entity_id: input_select.lr_av_activity
-      state_not: 'Off'
+      # The gate is the ACTIVITY ITSELF, not merely 'not Off'.
+      #
+      # `state_not: Off` let EVERY now-playing row through whenever the room
+      # was on, and then the inner gate picked whichever player happened to be
+      # in playing/paused. An Apple TV holds a stale 'paused' for hours, so
+      # switching to the Kaleidescape left the Apple TV's row on screen --
+      # the header describing a source the wall was no longer showing.
+      #
+      # Naming the activity ties the row to the ROUTED source, which is what it
+      # claims to describe. It also means two rows can never match at once.
+      state: 'Watch Apple TV'
       dock_header: true
       card:
         type: conditional
@@ -66,7 +76,17 @@
       # a stale 'paused' long after the system is down, and a now-playing row
       # for a dark room is worse than none.
       entity_id: input_select.lr_av_activity
-      state_not: 'Off'
+      # The gate is the ACTIVITY ITSELF, not merely 'not Off'.
+      #
+      # `state_not: Off` let EVERY now-playing row through whenever the room
+      # was on, and then the inner gate picked whichever player happened to be
+      # in playing/paused. An Apple TV holds a stale 'paused' for hours, so
+      # switching to the Kaleidescape left the Apple TV's row on screen --
+      # the header describing a source the wall was no longer showing.
+      #
+      # Naming the activity ties the row to the ROUTED source, which is what it
+      # claims to describe. It also means two rows can never match at once.
+      state: 'Watch Kaleidescape'
       dock_header: true
       card:
         type: conditional

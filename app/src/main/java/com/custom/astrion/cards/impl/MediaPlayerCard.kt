@@ -419,9 +419,18 @@ class MediaPlayerCard : CardRenderer {
         //
         // A gradient, not a flat scrim -- flat would reinstate the same seam a
         // few dp lower.
+        //
+        // heightIn, because the fade must survive the timeline NOT being there.
+        // ProgressBar draws nothing when the source publishes no duration (an
+        // Apple TV app that reports none, the Kaleidescape between titles), and
+        // this Box used to take its height entirely from that child -- so with
+        // no bar it collapsed to zero and the artwork ended on a hard horizontal
+        // edge. The fade is the header's bottom boundary; it cannot be optional
+        // just because one of the things drawn inside it is.
         Box(
             modifier = Modifier
                 .fillMaxWidth()
+                .heightIn(min = config.int("fade_height", 26).dp)
                 .background(
                     Brush.verticalGradient(
                         listOf(Color(0x000E2229), Color(0xE60E2229), Color(0xFF0E2229)),
